@@ -21,6 +21,8 @@ matplotlib = "^3.7.2"
 seaborn = "^0.12.2"
 aiohttp = "^3.8.4"
 tenacity = "^8.2.2"
+requests = "^2.31.0"
+lxml = "^4.9.3"
 
 
 [build-system]

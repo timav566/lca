@@ -38,4 +38,4 @@ async def collect_additional_info():
 
 
 if __name__ == "__main__":
-    asyncio.run(collect_additional_info())
+    asyncio.run(collect_repo_info())

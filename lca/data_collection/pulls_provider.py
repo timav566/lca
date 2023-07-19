@@ -2,6 +2,8 @@ from collections import defaultdict
 from typing import Optional, Any
 
 import aiohttp
+import requests as requests
+from lxml import html
 
 from lca.data_collection.github_collection import GITHUB_API_URL, make_github_http_request
 from lca.data_collection.repo_info_provider import RepoInfoProvider
@@ -24,10 +26,20 @@ class PullsProvider(RepoInfoProvider):
             if isinstance(github_api_response_or_error, Exception):
                 return github_api_response_or_error
 
-            data = github_api_response_or_error.data
+            pulls_data = github_api_response_or_error.data
 
-            self.repo_to_pulls[(owner, name)].append(data)
-            self.dump_data(owner, name, data)
+            for pull_data in pulls_data:
+                html_url = pull_data["html_url"]
+                pull_html = requests.get(html_url)
+                pull_html.raise_for_status()
+                html_content = pull_html.content
+
+                doc = html.fromstring(html_content)
+                linked_issues = [e.get('href') for e in doc.xpath('//form[@aria-label="Link issues"]/span/a')]
+                pull_data["linked_issues"] = linked_issues
+
+            self.repo_to_pulls[(owner, name)].append(pulls_data)
+            self.dump_data(owner, name, pulls_data)
 
             current_url = github_api_response_or_error.headers.get("next", None)
 
