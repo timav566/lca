@@ -1,0 +1,2 @@
+data_root: "/mnt/data/shared-data/data/lca/issues_prs/"
+repos: ["zekrotja__shinpuru.jsonl"]
