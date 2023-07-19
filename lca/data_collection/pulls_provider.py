@@ -30,13 +30,13 @@ class PullsProvider(RepoInfoProvider):
 
             for pull_data in pulls_data:
                 html_url = pull_data["html_url"]
-                pull_html = requests.get(html_url)
-                pull_html.raise_for_status()
-                html_content = pull_html.content
+                async with self.http_session.get(html_url) as response:
+                    response.raise_for_status()
+                    html_content = await response.text()
 
-                doc = html.fromstring(html_content)
-                linked_issues = [e.get('href') for e in doc.xpath('//form[@aria-label="Link issues"]/span/a')]
-                pull_data["linked_issues"] = linked_issues
+                    doc = html.fromstring(html_content.encode('utf-8'))
+                    linked_issues = [e.get('href') for e in doc.xpath('//form[@aria-label="Link issues"]/span/a')]
+                    pull_data["linked_issues"] = linked_issues
 
             self.repo_to_pulls[(owner, name)].append(pulls_data)
             self.dump_data(owner, name, pulls_data)
