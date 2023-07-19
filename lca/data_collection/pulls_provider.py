@@ -1,44 +1,17 @@
-import asyncio
-import json
-import os
 from collections import defaultdict
 from typing import Optional, Any
 
 import aiohttp
 
 from lca.data_collection.github_collection import GITHUB_API_URL, make_github_http_request
+from lca.data_collection.repo_info_provider import RepoInfoProvider
 
 
-class PullsProvider:
+class PullsProvider(RepoInfoProvider):
 
-    def __init__(
-            self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str
-    ):
-        self.http_session = http_session
-        self.github_tokens = github_tokens
-        self.data_folder = data_folder
-        self.repo_to_issues: dict[tuple[str, str], list[Any]] = defaultdict(list)
-
-    async def process_repositories(self, repositories: list[tuple[str, str]]):
-        prepare_repositories_coroutines = []
-        for i, (owner, name) in enumerate(repositories):
-            token = self.github_tokens[i % len(self.github_tokens)]
-            prepare_repositories_coroutines.append(
-                self.process_repo(
-                    github_token=token,
-                    owner=owner,
-                    name=name,
-                )
-            )
-
-        for repositories_future in asyncio.as_completed(prepare_repositories_coroutines):
-            await repositories_future
-
-    def dump_data(self, owner: str, name: str, items: list[dict]):
-        data_path = os.path.join(self.data_folder, f"{owner}__{name}.jsonl")
-        with open(data_path, "a") as f_data_output:
-            for item in items:
-                f_data_output.write(json.dumps(item) + "\n")
+    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str):
+        super().__init__(http_session, github_tokens, data_folder)
+        self.repo_to_pulls: dict[tuple[str, str], list[Any]] = defaultdict(list)
 
     async def process_repo(self, github_token: str, owner: str, name: str) -> Optional[Exception]:
         current_url = f"{GITHUB_API_URL}/repos/{owner}/{name}/pulls?per_page=100&state=all"
@@ -53,25 +26,9 @@ class PullsProvider:
 
             data = github_api_response_or_error.data
 
-            self.repo_to_issues[(owner, name)].append(data)
+            self.repo_to_pulls[(owner, name)].append(data)
             self.dump_data(owner, name, data)
 
             current_url = github_api_response_or_error.headers.get("next", None)
 
         return None
-
-
-async def main():
-    with open("./../../resources/tokens.txt", 'r') as f_tokens:
-        tokens = [line.strip() for line in f_tokens]
-
-    with open("./../../resources/repository_list.txt", 'r') as f_repos:
-        repos = [tuple(line.strip().split("/")) for line in f_repos]
-
-    async with aiohttp.ClientSession() as http_session:
-        provider = PullsProvider(http_session, tokens, "./../../pulls")
-        await provider.process_repositories(repos)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

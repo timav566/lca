@@ -366,7 +366,7 @@ async def list_and_process_repositories_by_url(
 
     incomplete_results = github_api_response_or_error.data["incomplete_results"]
     next_page_url = github_api_response_or_error.headers.get("next", None)
-    repositories = []
+    repositories: List[GithubRepository] = []
 
     if total_count > REPOSITORIES_MAX_AMOUNT_PER_SEARCH:
         logger.warning(f"Total count of repositories {total_count}"
@@ -511,3 +511,4 @@ def parse_github_url(url: str) -> Tuple[str, str]:
     :return: tuple with repository owner and name
     """
     owner, name = urlparse(url).path.split("/")[1:]
+    return owner, name
