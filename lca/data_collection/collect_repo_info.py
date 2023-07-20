@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import aiohttp
 
-from lca.data_collection.pulls_provider import PullsProvider
+from lca.data_collection.repo_objects_provider import RepoObjectsProvider
 
 
 def get_repos(repos_path) -> list[tuple]:
@@ -16,14 +16,22 @@ def get_tokens(tokens_path) -> list[str]:
         return [line.strip() for line in f_tokens]
 
 
-async def collect_repo_info(repos: list[tuple], tokens: list[str], data_folder: str):
+async def collect_repo_info(repos: list[tuple], tokens: list[str], search_object: str, data_folder: str):
     async with aiohttp.ClientSession() as http_session:
-        provider = PullsProvider(http_session, tokens, data_folder)
+        provider = RepoObjectsProvider(http_session, tokens, search_object, data_folder)
         await provider.process_repositories(repos)
 
 
 if __name__ == "__main__":
     argparser = ArgumentParser()
+
+    argparser.add_argument(
+        "-o",
+        "--search-object",
+        type=str,
+        default="pulls",
+        help="Object to search in github",
+    )
 
     argparser.add_argument(
         "-r",
@@ -54,4 +62,4 @@ if __name__ == "__main__":
     repos = get_repos(args.repos_path)
     tokens = get_tokens(args.tokens_path)
 
-    asyncio.run(collect_repo_info(repos, tokens, args.save_dir))
+    asyncio.run(collect_repo_info(repos, tokens, args.search_object, args.save_dir))
