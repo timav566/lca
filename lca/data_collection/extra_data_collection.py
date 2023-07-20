@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import aiohttp
 
-from lca.data_collection.repo_objects_provider import RepoObjectsProvider
+from lca.data_collection.pulls_extra_data_provider import PullsExtraDataProvider
 
 
 def get_repos(repos_path) -> list[tuple]:
@@ -16,9 +16,9 @@ def get_tokens(tokens_path) -> list[str]:
         return [line.strip() for line in f_tokens]
 
 
-async def collect_repo_info(repos: list[tuple], tokens: list[str], search_object: str, data_folder: str):
+async def collect_extra_data(repos: list[tuple], tokens: list[str], src_data_folder: str, dst_data_folder: str):
     async with aiohttp.ClientSession() as http_session:
-        provider = RepoObjectsProvider(http_session, tokens, search_object, data_folder)
+        provider = PullsExtraDataProvider(http_session, tokens, src_data_folder, dst_data_folder)
         await provider.process_repositories(repos)
 
 
@@ -26,18 +26,10 @@ if __name__ == "__main__":
     argparser = ArgumentParser()
 
     argparser.add_argument(
-        "-o",
-        "--search-object",
-        type=str,
-        default="pulls",
-        help="Object to search in github",
-    )
-
-    argparser.add_argument(
         "-r",
         "--repos-path",
         type=str,
-        default="./../../resources/repository_list.txt",
+        default="./../../resources/repository_list_short.txt",
         help="Path to txt file with repos list to process",
     )
 
@@ -51,10 +43,18 @@ if __name__ == "__main__":
 
     argparser.add_argument(
         "-s",
-        "--save-dir",
+        "--src-data-folder",
         type=str,
         default="./../../repo_info",
-        help="Path to the directory where collected data will be saved",
+        help="Path to the directory where data stored initially",
+    )
+
+    argparser.add_argument(
+        "-d",
+        "--dst-data-folder",
+        type=str,
+        default="./../../repo_info",
+        help="Path to the directory where data with extra loaded features will be stored",
     )
 
     args = argparser.parse_args()
@@ -62,4 +62,4 @@ if __name__ == "__main__":
     repos = get_repos(args.repos_path)
     tokens = get_tokens(args.tokens_path)
 
-    asyncio.run(collect_repo_info(repos, tokens, args.search_object, args.save_dir))
+    asyncio.run(collect_extra_data(repos, tokens, args.src_data_folder, args.dst_data_folder))

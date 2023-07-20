@@ -9,13 +9,11 @@ from lca.data_collection.github_collection import GITHUB_API_URL, make_github_ht
 
 
 class RepoObjectsProvider:
-    def __init__(
-        self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str, search_object: str
-    ):
+    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str, data: str):
         self.http_session = http_session
         self.github_tokens = github_tokens
         self.data_folder = data_folder
-        self.search_object = search_object
+        self.data = data
 
         os.makedirs(self.data_folder, exist_ok=True)
 
@@ -41,7 +39,7 @@ class RepoObjectsProvider:
                 f_data_output.write(json.dumps(item) + "\n")
 
     async def process_repo(self, github_token: str, owner: str, name: str) -> Optional[Exception]:
-        current_url = f"{GITHUB_API_URL}/repos/{owner}/{name}/{self.search_object}?per_page=100&state=all"
+        current_url = f"{GITHUB_API_URL}/repos/{owner}/{name}/{self.data}?per_page=100&state=all"
 
         while current_url is not None:
             print(f"Processing: {current_url}")

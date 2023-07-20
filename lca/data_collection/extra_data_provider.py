@@ -7,7 +7,7 @@ from typing import Optional
 import aiohttp
 
 
-class AdditionalObjectsProvider(abc.ABC):
+class ExtraDataProvider(abc.ABC):
     def __init__(
         self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
     ):
@@ -17,7 +17,7 @@ class AdditionalObjectsProvider(abc.ABC):
         self.dst_data_folder = dst_data_folder
 
     @abc.abstractmethod
-    async def process_items(self, item: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
+    async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
         pass
 
     async def process_repositories(self, repositories: list[tuple]):
@@ -30,7 +30,7 @@ class AdditionalObjectsProvider(abc.ABC):
                     items = [json.loads(line) for line in f]
                     prepare_repositories_coroutines.append(
                         self.process_items(
-                            item=items,
+                            items=items,
                             github_token=token,
                             owner=owner,
                             name=name,

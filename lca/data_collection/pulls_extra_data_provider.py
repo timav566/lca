@@ -4,17 +4,17 @@ from typing import Optional
 import aiohttp
 from lxml import html
 
+from lca.data_collection.extra_data_provider import ExtraDataProvider
 from lca.data_collection.github_collection import make_github_http_request
-from lca.data_collection.object_info_provider import AdditionalObjectsProvider
 
 
-class PullsInfoProvider(AdditionalObjectsProvider):
+class PullsExtraDataProvider(ExtraDataProvider):
     def __init__(
         self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
     ):
         super().__init__(http_session, github_tokens, src_data_folder, dst_data_folder)
 
-    async def _get_linked_issues(self, html_url: str):
+    async def _get_linked_issues(self, html_url: str) -> Optional[list[str]]:
         time_start = datetime.now()
         async with self.http_session.get(html_url) as response:
             response.raise_for_status()
@@ -24,7 +24,7 @@ class PullsInfoProvider(AdditionalObjectsProvider):
 
             time_start = datetime.now()
             doc = html.fromstring(html_content.encode("utf-8"))
-            linked_issues = [e.get("href") for e in doc.xpath('//form[@aria-label="Link issues"]/span/a')]
+            linked_issues = [str(e.get("href")) for e in doc.xpath('//form[@aria-label="Link issues"]/span/a')]
             time_end = datetime.now()
             # print(f"Time parse html: {time_end - time_start}")
 
@@ -56,10 +56,10 @@ class PullsInfoProvider(AdditionalObjectsProvider):
             pull_data["commits"] = commits_data
 
             html_url = pull_data["html_url"]
-            commits_data = await self._get_linked_issues(html_url)
-            if isinstance(commits_data, Exception):
-                return commits_data
-            pull_data["linked_issues"] = commits_data
+            linked_issues = await self._get_linked_issues(html_url)
+            if isinstance(linked_issues, Exception):
+                return linked_issues
+            pull_data["linked_issues"] = linked_issues
 
         self.dump_data(owner, name, items)
 
