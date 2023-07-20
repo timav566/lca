@@ -46,13 +46,6 @@ class PullsProvider(RepoInfoProvider):
             commits_data += github_api_response_or_error.data
             current_url = github_api_response_or_error.headers.get("next", None)
 
-            # for commit_data in commits_data:
-            #     commit_sha = commit_data.get("sha")
-            #     commit_diff_url = commit_data.get("url")
-            #     if commit_sha and commit_diff_url:
-            #         diff_response = await make_github_http_request(self.http_session, github_token, commit_diff_url)
-            #         commit_data['diff'] = diff_response.data
-
         return commits_data
 
     async def process_repo(self, github_token: str, owner: str, name: str) -> Optional[Exception]:
@@ -73,8 +66,8 @@ class PullsProvider(RepoInfoProvider):
 
             time_start = datetime.now()
             for pull_data in pulls_data:
-                html_url = pull_data["html_url"]
-                pull_data["linked_issues"] = await self._get_linked_issues(html_url)
+                # html_url = pull_data["html_url"]
+                # pull_data["linked_issues"] = await self._get_linked_issues(html_url)
 
                 commit_url = pull_data["commits_url"]
                 pull_data["commits"] = await self._get_commits(commit_url, github_token)
