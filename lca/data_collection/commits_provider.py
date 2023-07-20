@@ -7,9 +7,9 @@ from lca.data_collection.github_collection import make_github_http_request
 
 
 class CommitsProvider(AdditionalInfoProvider):
-
-    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str],
-                 src_data_folder: str, dst_data_folder: str):
+    def __init__(
+        self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
+    ):
         super().__init__(http_session, github_tokens, src_data_folder, dst_data_folder)
 
     async def process_item(self, item: dict, owner: str, name: str, github_token: str) -> Optional[Exception]:
@@ -31,7 +31,7 @@ class CommitsProvider(AdditionalInfoProvider):
                 commit_diff_url = commit_data.get("url")
                 if commit_sha and commit_diff_url:
                     diff_response = await make_github_http_request(self.http_session, github_token, commit_diff_url)
-                    commit_data['diff'] = diff_response.data
+                    commit_data["diff"] = diff_response.data
 
             self.dump_data(owner, name, commits_data)
 

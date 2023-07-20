@@ -1,23 +1,22 @@
 import asyncio
 from argparse import ArgumentParser
-from typing import List
 
 import aiohttp
 
 from lca.data_collection.pulls_provider import PullsProvider
 
 
-def get_repos(repos_path) -> List[tuple]:
-    with open(repos_path, 'r') as f_repos:
+def get_repos(repos_path) -> list[tuple]:
+    with open(repos_path, "r") as f_repos:
         return [tuple(line.strip().split("/")) for line in f_repos]
 
 
-def get_tokens(tokens_path) -> List[str]:
-    with open(tokens_path, 'r') as f_tokens:
+def get_tokens(tokens_path) -> list[str]:
+    with open(tokens_path, "r") as f_tokens:
         return [line.strip() for line in f_tokens]
 
 
-async def collect_repo_info(repos: List[tuple], tokens: List[str], data_folder: str):
+async def collect_repo_info(repos: list[tuple], tokens: list[str], data_folder: str):
     async with aiohttp.ClientSession() as http_session:
         provider = PullsProvider(http_session, tokens, data_folder)
         await provider.process_repositories(repos)

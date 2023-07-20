@@ -1,7 +1,7 @@
 import abc
 import json
 import os
-from typing import Optional, Any
+from typing import Optional
 
 import aiohttp
 
@@ -9,9 +9,9 @@ from lca.data_collection.repo_info_provider import RepoInfoProvider
 
 
 class AdditionalInfoProvider(RepoInfoProvider):
-
-    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str],
-                 src_data_folder: str, dst_data_folder: str):
+    def __init__(
+        self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
+    ):
         super().__init__(http_session, github_tokens, dst_data_folder)
         self.src_data_folder = src_data_folder
 
@@ -19,7 +19,7 @@ class AdditionalInfoProvider(RepoInfoProvider):
     async def process_item(self, item: dict, owner: str, name: str, github_token: str) -> Optional[Exception]:
         pass
 
-    def dump_data(self, owner: str, name: str, items: list[dict[Any, Any]]):
+    def dump_data(self, owner: str, name: str, items: list[dict]):
         data_path = os.path.join(self.data_folder, f"{owner}__{name}.jsonl")
         with open(data_path, "a") as f_data_output:
             for item in items:
