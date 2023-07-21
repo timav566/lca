@@ -1,3 +1,5 @@
+import json
+import os
 import re
 from typing import Optional
 
@@ -9,13 +11,13 @@ from lca.data_collection.process.repo_data_processor import RepoDataProcessor
 class CommentsProcessor(RepoDataProcessor):
 
     def __init__(
-            self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str,
+            self, http_session: aiohttp.ClientSession, github_tokens: list[str], comments_data_folder: str,
             dst_data_folder: str
     ):
-        super().__init__(http_session, github_tokens, src_data_folder, dst_data_folder)
+        super().__init__(http_session, github_tokens, comments_data_folder, dst_data_folder)
 
     @staticmethod
-    def _find_linked_issues_ids(body: str):
+    def _find_linked_issue_urls(body: str, owner: str, name: str):
         """ https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls """
 
         patterns = [
@@ -33,12 +35,19 @@ class CommentsProcessor(RepoDataProcessor):
         for p in patterns:
             linked_issues_ids += re.findall(p, body)
 
-        return linked_issues_ids
+        return [f"https://api.github.com/repos/{owner}/{name}/issues/{issue_id}" for issue_id in linked_issues_ids]
 
-    async def process_item(self, item: dict, owner: str, name: str, github_token: str) -> Optional[Exception]:
-        print(item['html_url'])
-        print(item['issue_url'])
-        print(self._find_linked_issues_ids(item['body']))
-        self.dump_data(owner, name, item)
+    async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
+        prs_issues_links = []
+        for item in items:
+            prs_issues_links.append(
+                {
+                    'comment_url': item['url'],
+                    'issue_url': item['issue_url'],
+                    'linked_issue_urls': self._find_linked_issue_urls(item['body'], owner, name),
+                }
+            )
+
+        self.dump_data(owner, name, prs_issues_links)
 
         return None

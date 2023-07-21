@@ -47,19 +47,20 @@ class PullsProcessor(RepoDataProcessor):
 
         return commits_data
 
-    async def process_items(self, item: dict, owner: str, name: str, github_token: str) -> Optional[Exception]:
-        commits_url = item["commits_url"]
-        commits_data = await self._get_commits(commits_url, github_token)
-        if isinstance(commits_data, Exception):
-            return commits_data
-        item["commits"] = commits_data
+    async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
+        for item in items:
+            commits_url = item["commits_url"]
+            commits_data = await self._get_commits(commits_url, github_token)
+            if isinstance(commits_data, Exception):
+                return commits_data
+            item["commits"] = commits_data
 
-        html_url = item["html_url"]
-        linked_issues = await self._get_linked_issues(html_url)
-        if isinstance(linked_issues, Exception):
-            return linked_issues
-        item["linked_issues"] = linked_issues
+            html_url = item["html_url"]
+            linked_issues = await self._get_linked_issues(html_url)
+            if isinstance(linked_issues, Exception):
+                return linked_issues
+            item["linked_issues"] = linked_issues
 
-        self.dump_data(owner, name, item)
+        self.dump_data(owner, name, items)
 
         return None

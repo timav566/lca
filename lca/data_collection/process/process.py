@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 import aiohttp
 
 from lca.data_collection.process.prs_issues_link import CommentsProcessor
-from lca.data_collection.process.pulls_processor import PullsProcessor
 
 
 def get_repos(repos_path) -> list[tuple]:
