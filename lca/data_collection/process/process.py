@@ -29,7 +29,7 @@ if __name__ == "__main__":
         "-r",
         "--repos-path",
         type=str,
-        default="./../../resources/repository_list_short.txt",
+        default="./../../../resources/repository_list.txt",
         help="Path to txt file with repos list to process",
     )
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         "-t",
         "--tokens-path",
         type=str,
-        default="./../../resources/tokens.txt",
+        default="./../../../resources/tokens.txt",
         help="Path to txt file with qit tokens",
     )
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         "-s",
         "--src-data-folder",
         type=str,
-        default="./../../comments",
+        default="./../../../comments",
         help="Path to the directory where data stored initially",
     )
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         "-d",
         "--dst-data-folder",
         type=str,
-        default="./../../issues_prs_link",
+        default="./../../../issues_pulls_link",
         help="Path to the directory where data with extra loaded features will be stored",
     )
 

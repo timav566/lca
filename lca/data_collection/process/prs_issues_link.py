@@ -1,5 +1,3 @@
-import json
-import os
 import re
 from typing import Optional
 
@@ -41,6 +39,7 @@ class CommentsProcessor(RepoDataProcessor):
 
     async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
         prs_issues_links = []
+
         for item in items:
             prs_issues_links.append(
                 {

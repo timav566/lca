@@ -27,6 +27,8 @@ class RepoDataProcessor(abc.ABC):
         for i, (owner, name) in enumerate(repositories):
             token = self.github_tokens[i % len(self.github_tokens)]
             file_path = os.path.join(self.src_data_folder, f"{owner}__{name}.jsonl")
+            print(f"Processing: {file_path}")
+
             if os.path.isfile(file_path):
                 with open(file_path, "r") as f:
                     items = [json.loads(line) for line in f]
