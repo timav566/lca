@@ -9,7 +9,8 @@ import aiohttp
 
 class RepoDataProcessor(abc.ABC):
     def __init__(
-        self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
+            self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str,
+            dst_data_folder: str
     ):
         self.http_session = http_session
         self.github_tokens = github_tokens
@@ -21,6 +22,10 @@ class RepoDataProcessor(abc.ABC):
     @abc.abstractmethod
     async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
         pass
+
+    async def process_repositories_in_batches(self, repositories: list[tuple], batch_size: int = 10):
+        for i in range(0, len(repositories), batch_size):
+            await self.process_repositories(repositories[i:i + batch_size])
 
     async def process_repositories(self, repositories: list[tuple]):
         prepare_repositories_coroutines = []

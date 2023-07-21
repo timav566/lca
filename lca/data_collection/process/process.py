@@ -19,7 +19,7 @@ def get_tokens(tokens_path) -> list[str]:
 async def process_data(repos: list[tuple], tokens: list[str], src_data_folder: str, dst_data_folder: str):
     async with aiohttp.ClientSession() as http_session:
         provider = CommentsProcessor(http_session, tokens, src_data_folder, dst_data_folder)
-        await provider.process_repositories(repos)
+        await provider.process_repositories_in_batches(repos)
 
 
 if __name__ == "__main__":
