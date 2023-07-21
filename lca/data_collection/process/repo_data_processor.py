@@ -9,8 +9,7 @@ import aiohttp
 
 class RepoDataProcessor(abc.ABC):
     def __init__(
-            self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str,
-            dst_data_folder: str
+        self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
     ):
         self.http_session = http_session
         self.github_tokens = github_tokens

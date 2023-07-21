@@ -4,8 +4,8 @@ from typing import Optional
 import aiohttp
 from lxml import html
 
-from lca.data_collection.process.repo_data_processor import RepoDataProcessor
 from lca.data_collection.collect.github_collection import make_github_http_request
+from lca.data_collection.process.repo_data_processor import RepoDataProcessor
 
 
 class PullsProcessor(RepoDataProcessor):
