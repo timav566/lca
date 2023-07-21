@@ -7,7 +7,7 @@ from typing import Optional
 import aiohttp
 
 
-class ExtraDataProvider(abc.ABC):
+class RepoDataProcessor(abc.ABC):
     def __init__(
         self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
     ):
@@ -15,6 +15,8 @@ class ExtraDataProvider(abc.ABC):
         self.github_tokens = github_tokens
         self.src_data_folder = src_data_folder
         self.dst_data_folder = dst_data_folder
+
+        os.makedirs(self.dst_data_folder, exist_ok=True)
 
     @abc.abstractmethod
     async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:

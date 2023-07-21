@@ -5,7 +5,7 @@ from typing import Optional
 
 import aiohttp
 
-from lca.data_collection.github_collection import GITHUB_API_URL, make_github_http_request
+from lca.data_collection.collect.github_collection import GITHUB_API_URL, make_github_http_request
 
 
 class RepoObjectsProvider:

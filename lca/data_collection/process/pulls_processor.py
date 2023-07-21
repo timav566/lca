@@ -4,11 +4,11 @@ from typing import Optional
 import aiohttp
 from lxml import html
 
-from lca.data_collection.extra_data_provider import ExtraDataProvider
-from lca.data_collection.github_collection import make_github_http_request
+from lca.data_collection.collect.github_collection import make_github_http_request
+from lca.data_collection.process.repo_data_processor import RepoDataProcessor
 
 
-class PullsExtraDataProvider(ExtraDataProvider):
+class PullsProcessor(RepoDataProcessor):
     def __init__(
         self, http_session: aiohttp.ClientSession, github_tokens: list[str], src_data_folder: str, dst_data_folder: str
     ):
@@ -48,18 +48,18 @@ class PullsExtraDataProvider(ExtraDataProvider):
         return commits_data
 
     async def process_items(self, items: list[dict], owner: str, name: str, github_token: str) -> Optional[Exception]:
-        for pull_data in items:
-            commits_url = pull_data["commits_url"]
+        for item in items:
+            commits_url = item["commits_url"]
             commits_data = await self._get_commits(commits_url, github_token)
             if isinstance(commits_data, Exception):
                 return commits_data
-            pull_data["commits"] = commits_data
+            item["commits"] = commits_data
 
-            html_url = pull_data["html_url"]
+            html_url = item["html_url"]
             linked_issues = await self._get_linked_issues(html_url)
             if isinstance(linked_issues, Exception):
                 return linked_issues
-            pull_data["linked_issues"] = linked_issues
+            item["linked_issues"] = linked_issues
 
         self.dump_data(owner, name, items)
 

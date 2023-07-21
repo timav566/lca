@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import aiohttp
 
-from lca.data_collection.repo_data_provider import RepoObjectsProvider
+from lca.data_collection.process.prs_issues_link import CommentsProcessor
 
 
 def get_repos(repos_path) -> list[tuple]:
@@ -16,22 +16,14 @@ def get_tokens(tokens_path) -> list[str]:
         return [line.strip() for line in f_tokens]
 
 
-async def collect_repo_data(repos: list[tuple], tokens: list[str], data_folder: str, search_object: str):
+async def process_data(repos: list[tuple], tokens: list[str], src_data_folder: str, dst_data_folder: str):
     async with aiohttp.ClientSession() as http_session:
-        provider = RepoObjectsProvider(http_session, tokens, data_folder, search_object)
+        provider = CommentsProcessor(http_session, tokens, src_data_folder, dst_data_folder)
         await provider.process_repositories(repos)
 
 
 if __name__ == "__main__":
     argparser = ArgumentParser()
-
-    argparser.add_argument(
-        "-o",
-        "--search-object",
-        type=str,
-        default="pulls",
-        help="Object to search in github",
-    )
 
     argparser.add_argument(
         "-r",
@@ -51,10 +43,18 @@ if __name__ == "__main__":
 
     argparser.add_argument(
         "-s",
-        "--save-dir",
+        "--src-data-folder",
         type=str,
-        default="./../../repo_info",
-        help="Path to the directory where collected data will be saved",
+        default="./../../comments",
+        help="Path to the directory where data stored initially",
+    )
+
+    argparser.add_argument(
+        "-d",
+        "--dst-data-folder",
+        type=str,
+        default="./../../issues_prs_link",
+        help="Path to the directory where data with extra loaded features will be stored",
     )
 
     args = argparser.parse_args()
@@ -62,4 +62,4 @@ if __name__ == "__main__":
     repos = get_repos(args.repos_path)
     tokens = get_tokens(args.tokens_path)
 
-    asyncio.run(collect_repo_data(repos, tokens, args.save_dir, args.search_object))
+    asyncio.run(process_data(repos, tokens, args.src_data_folder, args.dst_data_folder))
