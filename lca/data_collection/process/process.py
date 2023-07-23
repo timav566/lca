@@ -6,9 +6,16 @@ import aiohttp
 from lca.data_collection.process.prs_issues_link import CommentsProcessor
 
 
-def get_repos(repos_path) -> list[tuple]:
+def get_repos(repos_path, from_repo) -> list[tuple]:
     with open(repos_path, "r") as f_repos:
-        return [tuple(line.strip().split("/")) for line in f_repos]
+        repos = [tuple(line.strip().split("/")) for line in f_repos]
+        from_repo_index = 0
+        from_owner, from_name = from_repo.split("__")
+        for i, r in enumerate(repos):
+            owner, name = r
+            if owner == from_owner and name == from_name:
+                from_repo_index = i
+        return repos[from_repo_index:]
 
 
 def get_tokens(tokens_path) -> list[str]:
@@ -42,6 +49,14 @@ if __name__ == "__main__":
     )
 
     argparser.add_argument(
+        "-f",
+        "--from-repo",
+        type=str,
+        default="mpusz__mp-units",
+        help="Repo name to start from",
+    )
+
+    argparser.add_argument(
         "-s",
         "--src-data-folder",
         type=str,
@@ -59,7 +74,7 @@ if __name__ == "__main__":
 
     args = argparser.parse_args()
 
-    repos = get_repos(args.repos_path)
+    repos = get_repos(args.repos_path, args.from_repo)
     tokens = get_tokens(args.tokens_path)
 
     asyncio.run(process_data(repos, tokens, args.src_data_folder, args.dst_data_folder))
