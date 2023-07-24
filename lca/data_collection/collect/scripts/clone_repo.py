@@ -7,7 +7,7 @@ from lca.data_collection.collect.utils import get_repos, get_tokens
 
 async def collect_repo_data(repos: list[tuple], tokens: list[str], data_folder: str):
     provider = RepoCloner(tokens, data_folder)
-    await provider.process_repositories(repos)
+    await provider.process_repositories_in_batches(repos)
 
 
 if __name__ == "__main__":
