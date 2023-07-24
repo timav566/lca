@@ -6,7 +6,6 @@ from lca.data_collection.collect.repo_processor import RepoProcessor
 
 
 class RepoCloner(RepoProcessor):
-
     def __init__(self, github_tokens: list[str], repos_dir: str):
         super().__init__(github_tokens)
         self.repos_dir = repos_dir

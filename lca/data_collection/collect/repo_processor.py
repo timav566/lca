@@ -9,7 +9,7 @@ class RepoProcessor(abc.ABC):
 
     async def process_repositories_in_batches(self, repositories: list[tuple], batch_size: int = 10):
         for i in range(0, len(repositories), batch_size):
-            await self.process_repositories(repositories[i:i + batch_size])
+            await self.process_repositories(repositories[i : i + batch_size])
 
     async def process_repositories(self, repositories: list[tuple]):
         prepare_repositories_coroutines = []

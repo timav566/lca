@@ -9,8 +9,9 @@ from lca.data_collection.collect.repo_processor import RepoProcessor
 
 
 class RepoObjectsProvider(RepoProcessor):
-    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str,
-                 search_object: str):
+    def __init__(
+        self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str, search_object: str
+    ):
         super().__init__(github_tokens)
         self.http_session = http_session
         self.data_folder = data_folder
