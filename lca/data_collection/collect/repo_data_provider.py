@@ -1,36 +1,22 @@
-import asyncio
 import json
 import os
 from typing import Optional
 
 import aiohttp
 
-from lca.data_collection.collect.github_collection import GITHUB_API_URL, make_github_http_request
+from lca.data_collection.collect.github_utils import GITHUB_API_URL, make_github_http_request
+from lca.data_collection.collect.repo_processor import RepoProcessor
 
 
-class RepoObjectsProvider:
-    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str, data: str):
+class RepoObjectsProvider(RepoProcessor):
+    def __init__(self, http_session: aiohttp.ClientSession, github_tokens: list[str], data_folder: str,
+                 search_object: str):
+        super().__init__(github_tokens)
         self.http_session = http_session
-        self.github_tokens = github_tokens
         self.data_folder = data_folder
-        self.data = data
+        self.search_object = search_object
 
         os.makedirs(self.data_folder, exist_ok=True)
-
-    async def process_repositories(self, repositories: list[tuple]):
-        prepare_repositories_coroutines = []
-        for i, (owner, name) in enumerate(repositories):
-            token = self.github_tokens[i % len(self.github_tokens)]
-            prepare_repositories_coroutines.append(
-                self.process_repo(
-                    github_token=token,
-                    owner=owner,
-                    name=name,
-                )
-            )
-
-        for repositories_future in asyncio.as_completed(prepare_repositories_coroutines):
-            await repositories_future
 
     def dump_data(self, owner: str, name: str, items: list[dict]):
         data_path = os.path.join(self.data_folder, f"{owner}__{name}.jsonl")
@@ -39,7 +25,7 @@ class RepoObjectsProvider:
                 f_data_output.write(json.dumps(item) + "\n")
 
     async def process_repo(self, github_token: str, owner: str, name: str) -> Optional[Exception]:
-        current_url = f"{GITHUB_API_URL}/repos/{owner}/{name}/{self.data}?per_page=100&state=all"
+        current_url = f"{GITHUB_API_URL}/repos/{owner}/{name}.git/{self.search_object}?per_page=100&state=all"
 
         while current_url is not None:
             print(f"Processing: {current_url}")

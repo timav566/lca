@@ -1,6 +1,7 @@
 import asyncio
 import dataclasses
 import logging
+import subprocess
 import time
 import urllib
 from datetime import datetime, timezone
@@ -124,7 +125,7 @@ def return_last_value(retry_state):
     retry_error_callback=return_last_value,
 )
 async def make_github_http_request(
-    http_session: aiohttp.ClientSession, github_token: str, url: str
+        http_session: aiohttp.ClientSession, github_token: str, url: str
 ) -> GithubApiResponseOrError:
     """
     Make http request for specified url with github authorization and return http response body
@@ -230,7 +231,7 @@ async def handle_github_rate_limit(response: aiohttp.ClientResponse) -> GithubAp
 
 
 async def get_repository_meta(
-    http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str
+        http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str
 ) -> GithubRepositoryOrError:
     """
     Get github repository representation with id, default branch and meta
@@ -267,7 +268,7 @@ async def get_repository_meta(
 
 
 async def get_repository_last_commit_sha(
-    http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str, branch: str
+        http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str, branch: str
 ) -> Union[str, Exception]:
     """
     Get repository last commit sha for specified branch
@@ -288,7 +289,7 @@ async def get_repository_last_commit_sha(
 
 
 async def get_all_branches_from_repository(
-    http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str
+        http_session: aiohttp.ClientSession, github_token: str, owner: str, name: str
 ) -> Union[List[str], Exception]:
     """
     Get all branch names from repository.
@@ -311,7 +312,7 @@ async def get_all_branches_from_repository(
 
 
 async def list_and_process_repositories_by_query(
-    http_session: aiohttp.ClientSession, github_token: str, query: GithubApiRequestQuery, process_all_branches: bool
+        http_session: aiohttp.ClientSession, github_token: str, query: GithubApiRequestQuery, process_all_branches: bool
 ) -> GithubApiListRepositoriesResponseOrError:
     """
     Lists the first page of all repositories matching search query and parameters,
@@ -343,7 +344,7 @@ async def list_and_process_repositories_by_query(
 
 
 async def list_and_process_repositories_by_url(
-    http_session: aiohttp.ClientSession, github_token: str, url: str, process_all_branches: bool
+        http_session: aiohttp.ClientSession, github_token: str, url: str, process_all_branches: bool
 ) -> GithubApiListRepositoriesResponseOrError:
     """
     Lists the first page of all repositories matching search query and parameters,
@@ -414,17 +415,17 @@ async def list_and_process_repositories_by_url(
 
 
 async def iterate_over_branches_and_init_last_commit_sha(
-    http_session: aiohttp.ClientSession,
-    github_token: str,
-    repo_id: int,
-    repo_name: str,
-    repo_owner: str,
-    repo_collection_time: datetime,
-    repo_created_at: datetime,
-    repo_specific_branch: str,
-    repo_branches_url: str,
-    repo_meta: dict,
-    process_all_branches: bool,
+        http_session: aiohttp.ClientSession,
+        github_token: str,
+        repo_id: int,
+        repo_name: str,
+        repo_owner: str,
+        repo_collection_time: datetime,
+        repo_created_at: datetime,
+        repo_specific_branch: str,
+        repo_branches_url: str,
+        repo_meta: dict,
+        process_all_branches: bool,
 ) -> List[GithubRepository]:
     """
     Gets last commit sha for specific branches of the repo and returns repositories with this data.
@@ -517,3 +518,14 @@ def parse_github_url(url: str) -> Tuple[str, str]:
     """
     owner, name = urlparse(url).path.split("/")[1:]
     return owner, name
+
+
+async def clone_repo(owner: str, name: str, github_token: str, repo_dir: str) -> Optional[Exception]:
+    try:
+        git_cmd = ["git", "clone", f"https://{github_token}@github.com/{owner}/{name}.git", repo_dir]
+        process = await asyncio.create_subprocess_exec(*git_cmd)
+        stdout, stderr = await process.communicate()
+        print(f"Repository {owner}/{name} cloned successfully to repo_dir.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to clone repository {owner}/{name}", e)
+        return e
