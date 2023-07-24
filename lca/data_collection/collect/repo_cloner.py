@@ -17,3 +17,5 @@ class RepoCloner(RepoProcessor):
         repo_dir = f"{self.repos_dir}/{owner}__{name}"
         if not os.path.exists(repo_dir):
             return await clone_repo(owner, name, github_token, repo_dir)
+
+        return None
