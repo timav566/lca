@@ -4,16 +4,7 @@ from argparse import ArgumentParser
 import aiohttp
 
 from lca.data_collection.collect.repo_data_provider import RepoObjectsProvider
-
-
-def get_repos(repos_path) -> list[tuple]:
-    with open(repos_path, "r") as f_repos:
-        return [tuple(line.strip().split("/")) for line in f_repos]
-
-
-def get_tokens(tokens_path) -> list[str]:
-    with open(tokens_path, "r") as f_tokens:
-        return [line.strip() for line in f_tokens]
+from lca.data_collection.collect.utils import get_repos, get_tokens
 
 
 async def collect_repo_data(repos: list[tuple], tokens: list[str], data_folder: str, search_object: str):

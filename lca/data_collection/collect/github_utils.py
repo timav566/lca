@@ -1,6 +1,7 @@
 import asyncio
 import dataclasses
 import logging
+import subprocess
 import time
 import urllib
 from datetime import datetime, timezone
@@ -517,3 +518,15 @@ def parse_github_url(url: str) -> Tuple[str, str]:
     """
     owner, name = urlparse(url).path.split("/")[1:]
     return owner, name
+
+
+async def clone_repo(owner: str, name: str, github_token: str, repo_dir: str) -> Optional[Exception]:
+    try:
+        git_cmd = ["git", "clone", f"https://{github_token}@github.com/{owner}/{name}.git", repo_dir]
+        process = await asyncio.create_subprocess_exec(*git_cmd)
+        stdout, stderr = await process.communicate()
+        print(f"Repository {owner}/{name} cloned successfully to repo_dir.")
+        return None
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to clone repository {owner}/{name}", e)
+        return e
